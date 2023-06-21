@@ -78,6 +78,58 @@ def check_correctness(prob_path, generation, timeout, debug):
     return result[0]
 
 
+def eval_solution(solution, prob_path) -> bool:
+    """
+    Evaluate a solution against a list of tests.
+    """
+    curr_res = [-2]
+    try:
+        curr_res = check_correctness(
+            prob_path=prob_path, generation=solution, timeout=TIMEOUT #, debug=args.debug
+        )
+        for i in range(len(curr_res)):
+            if isinstance(curr_res[i], np.ndarray):
+                curr_res[i] = curr_res[i].item(0)
+            if isinstance(curr_res[i], np.bool_):
+                curr_res[i] = bool(curr_res[i])
+        return np.all(curr_res)
+    except Exception as e:
+        print(f"test framework exception = {repr(e)}{e}\n")
+    return False
+
+
+def eval_test_case(test_case, solutions) -> bool:
+    """
+    Evaluate a test case against a list of solutions.
+    """
+    answers = [get_answer(test_case, solution) for solution in solutions]
+    answers = [
+        tuple(answer) for answer in answers if isinstance(answer, list)
+    ]  # make sure answers are hashable
+
+    most_popular_answer = max(set(answers), key=answers.count)
+    disagreed_indices = [i for i, a in enumerate(answers) if a != most_popular_answer]
+
+    # if all answers are the same, then new test case is correct
+    if len(disagreed_indices) == 0:
+        return True
+
+    # possible that we have a solution that isn't correct
+    percent = 100 - len(disagreed_indices) * 100 / len(answers)
+    print(f"percent popularity of most common but not unanimous answer: {percent}")
+
+    # print disagreed indices
+    print("disagreed indices: ", disagreed_indices)
+    return False
+
+
+def get_answer(test_case, solution) -> str:
+    """
+    Get the answer to a test case given a solution.
+    """
+    ...
+
+
 def eval_and_save_problems(args):
     with open(args.test_loc, "r") as f:
         problems = sorted(json.load(f))
