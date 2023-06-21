@@ -141,13 +141,10 @@ def run_test(prob_path:str=None, problem_list:List[str]=None, prob_index:int=Non
             in_outs = json.load(f)
             if debug:
                 print(f"test cases json = {in_outs['inputs']} {in_outs['outputs']}")
-            
-            if in_outs.get("fn_name") is None:
-                which_type = CODE_TYPE.standard_input  # Standard input
-                method_name = None
-            else:
-                which_type = CODE_TYPE.call_based  # Call-based
-                method_name = in_outs["fn_name"]
+
+            method_name = in_outs.get("fn_name")
+            which_type = CODE_TYPE.standard_input if method_name is None else CODE_TYPE.call_based
+
     if debug:
         print(f"loaded json = {datetime.now().time()}")
  
