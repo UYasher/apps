@@ -131,16 +131,9 @@ def run_test(prob_path:str=None, problem_list:List[str]=None, prob_index:int=Non
 
     if debug:
         print(f"start = {datetime.now().time()}")
-    if prob_path is not None:
-        root = prob_path
-    elif problem_list is not None:
-        root = problem_list[prob_index]
 
-    if os.path.exists(os.path.join(root, "input_output.json")):
-        with open(os.path.join(root, "input_output.json")) as f:
-            in_outs = json.load(f)
-            if debug:
-                print(f"test cases json = {in_outs['inputs']} {in_outs['outputs']}")
+    root = prob_path if problem_list is None else problem_list[prob_index]
+    in_outs = get_in_outs(debug, root)
 
     method_name = in_outs.get("fn_name")
     which_type = CODE_TYPE.standard_input if method_name is None else CODE_TYPE.call_based
@@ -462,6 +455,16 @@ def run_test(prob_path:str=None, problem_list:List[str]=None, prob_index:int=Non
                         print(f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs}, {type(inputs)}, {output == [in_outs['outputs'][index]]}") 
 
     return results
+
+
+def get_in_outs(debug, root):
+    if os.path.exists(os.path.join(root, "input_output.json")):
+        with open(os.path.join(root, "input_output.json")) as f:
+            in_outs = json.load(f)
+            if debug:
+                print(f"test cases json = {in_outs['inputs']} {in_outs['outputs']}")
+    return in_outs
+
 
 def custom_compare_(output, ground_truth):
     
