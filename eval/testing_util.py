@@ -147,9 +147,7 @@ def run_test(prob_path:str=None, problem_list:List[str]=None, prob_index:int=Non
 
     if debug:
         print(f"loaded json = {datetime.now().time()}")
- 
-    #else:
-    #    continue
+
     if test is None:
         return in_outs
     elif test is not None:
@@ -163,7 +161,7 @@ def run_test(prob_path:str=None, problem_list:List[str]=None, prob_index:int=Non
  
         if which_type == CODE_TYPE.call_based:
             sol += test
-            if debug: # or True:
+            if debug:
                 print(f"sol = {sol}")
             signal.alarm(timeout)
             try:
@@ -209,7 +207,6 @@ def run_test(prob_path:str=None, problem_list:List[str]=None, prob_index:int=Non
             sol += tmp_test
             if debug:
                 print(f"sol = {sol}")
-                # print(f"{o}") 
             method_name = "code"
             signal.alarm(timeout)
             try:
@@ -258,8 +255,6 @@ def run_test(prob_path:str=None, problem_list:List[str]=None, prob_index:int=Non
                 signal.alarm(timeout)
                 faulthandler.enable()
                 try:
-                    # print("------------")
-                    # print(inputs)
                     output = method(*inputs)
 
                     # ground truth sequences are not tuples
@@ -465,7 +460,6 @@ def run_test(prob_path:str=None, problem_list:List[str]=None, prob_index:int=Non
                         print(f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs.replace(nl,' new-line ')}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
                     else:
                         print(f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs}, {type(inputs)}, {output == [in_outs['outputs'][index]]}") 
-
 
     return results
 
