@@ -27,6 +27,24 @@ class CODE_TYPE(Enum):
     call_based = 0
     standard_input = 1
 
+DEFAULT_IMPORTS = '''
+import sys
+import time
+import itertools
+from itertools import accumulate, product, permutations, combinations
+import collections
+from collections import Counter, OrderedDict, deque, defaultdict, ChainMap
+from functools import lru_cache
+import math
+from math import sqrt, sin, cos, tan, ceil, fabs, floor, gcd, exp, log, log2
+import fractions
+from typing import List, Tuple
+import numpy as np
+import random
+import heapq
+from heapq import *
+'''
+
 # stuff for setting up signal timer
 class TimeoutException(Exception):
     pass
@@ -160,7 +178,7 @@ def run_code_on_test(in_outs, test, debug):
     which_type = CODE_TYPE.standard_input if method_name is None else CODE_TYPE.call_based
 
     results = []
-    sol = "import sys\nimport time\nimport itertools\nfrom itertools import accumulate, product, permutations, combinations\nimport collections\nfrom collections import Counter, OrderedDict, deque, defaultdict, ChainMap\nfrom functools import lru_cache\nimport math\nfrom math import sqrt, sin, cos, tan, ceil, fabs, floor, gcd, exp, log, log2\nimport fractions\nfrom typing import List, Tuple\nimport numpy as np\nimport random\nimport heapq\nfrom heapq import *\n"
+    sol = DEFAULT_IMPORTS
     if debug:
         print(f"loading test code = {datetime.now().time()}")
 
