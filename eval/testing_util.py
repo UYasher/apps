@@ -192,6 +192,8 @@ def run_code_on_test(in_outs, test, debug):
             print(
                 f"time: {datetime.now().time()} testing index = {index}  inputs = {inputs}, {type(inputs)}. type = {which_type}")
         results += run_single_test_case(method, which_type, inputs, test_output, debug)
+        if debug and results[-1]:
+            print("PASSED")
 
     return results
 
@@ -362,17 +364,9 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             return results
 
         # if they are all numbers, round so that similar numbers are treated as identical
-        try:
-            tmp_result = (set(frozenset(round(float(t), 3) for t in s) for s in method_output) == \
-                                        set(frozenset(round(float(t), 3) for t in s) for s in
-                                            test_output))
-        except Exception as e:
-            print(f"Failed check6 exception = {e}")
-
-        if tmp_result and debug:
-            print("PASSED")
-
-        results.append(tmp_result)
+        if try_to_check(order_invariant_check, round_floats(method_output), round_floats(test_output), check_number=6):
+            results.append(True)
+            return results
 
         if debug:
             nl = "\n"
@@ -382,6 +376,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             else:
                 print(
                     f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
+
+        return [False]
     return results
 
 def parse_output_format(method_output, test_output):
@@ -469,6 +465,9 @@ def order_invariant_check(method_output, test_output):
 
 def order_invariant(xs):
     return set(frozenset(x) for x in xs)
+
+def round_floats(input_list):
+    return [[round(float(t), 3) for t in s] for s in input_list]
 
 def custom_compare_(output, ground_truth):
     
