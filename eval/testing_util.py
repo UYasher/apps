@@ -303,58 +303,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         if debug:
             print(f"==> output = {method_output}, test outputs = {test_output}")
 
-        if custom_compare_(method_output, test_output):
-            return True
-
-        if try_to_check(check_1, method_output, test_output, check_number=1):
-            return True
-
-        if try_to_check(basic_check, method_output, test_output_without_spacing, check_number=2):
-            return True
-
-        if debug:
-            nl = "\n"
-            if isinstance(inputs, list):
-                inputs = "\n".join(inputs)
-            if not isinstance(inputs, list):
-                print(
-                    f"output = {method_output_list}, test outputs = {test_output_without_spacing}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output_list == [test_output_without_spacing]}")
-            else:
-                print(
-                    f"output = {method_output_list}, test outputs = {test_output_without_spacing}, inputs = {inputs}, {type(inputs)}, {method_output_list == [test_output_without_spacing]}")
-
-        if try_to_check(basic_check, method_output_list, test_output_without_spacing, check_number=3):
-            return True
-
-        if try_to_check(float_list_check, method_output_list, test_output_without_spacing):
-            return True
-
-        if isinstance(method_output[0], list) and try_to_check(float_list_check, method_output_list[0], test_output_without_spacing[0]):
-            return True
-
-        # Similar, but not that similar, to check1
-        if try_to_check(lambda x, y: x == y, method_output_list, test_output_split, check_number=4):
-            return True
-
-        if try_to_check(order_invariant_check, method_output_split, test_output_split, check_number=5):
-            return True
-
-        # if they are all numbers, round so that similar numbers are treated as identical
-        if try_to_check(order_invariant_check, round_floats(method_output_split), round_floats(test_output_split), check_number=6):
-            return True
-
-        if debug:
-            nl = "\n"
-            if isinstance(inputs, list):
-                inputs = "\n".join(inputs)
-            if not isinstance(inputs, list):
-                print(
-                    f"output = {method_output_split}, test outputs = {test_output_split}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output_split == [test_output_split]}")
-            else:
-                print(
-                    f"output = {method_output_split}, test outputs = {test_output_split}, inputs = {inputs}, {type(inputs)}, {method_output_split == [test_output_split]}")
-
-        return False
+        return parse_all_output_types(method_output, method_output_list, method_output_split, test_output, test_output_without_spacing, test_output_split, inputs, debug)
 
 def parse_output_format(method_output, test_output):
     if method_output == test_output:
@@ -454,6 +403,62 @@ def order_invariant(xs):
 
 def round_floats(input_list):
     return [[round(float(t), 3) for t in s] for s in input_list]
+
+def parse_all_output_types(method_output, method_output_list, method_output_split, test_output, test_output_without_spacing, test_output_split, inputs, debug):
+    if custom_compare_(method_output, test_output):
+        return True
+
+    if try_to_check(check_1, method_output, test_output, check_number=1):
+        return True
+
+    if try_to_check(basic_check, method_output, test_output_without_spacing, check_number=2):
+        return True
+
+    if debug:
+        nl = "\n"
+        if isinstance(inputs, list):
+            inputs = "\n".join(inputs)
+        if not isinstance(inputs, list):
+            print(
+                f"output = {method_output_list}, test outputs = {test_output_without_spacing}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output_list == [test_output_without_spacing]}")
+        else:
+            print(
+                f"output = {method_output_list}, test outputs = {test_output_without_spacing}, inputs = {inputs}, {type(inputs)}, {method_output_list == [test_output_without_spacing]}")
+
+    if try_to_check(basic_check, method_output_list, test_output_without_spacing, check_number=3):
+        return True
+
+    if try_to_check(float_list_check, method_output_list, test_output_without_spacing):
+        return True
+
+    if isinstance(method_output[0], list) and try_to_check(float_list_check, method_output_list[0],
+                                                           test_output_without_spacing[0]):
+        return True
+
+    # Similar, but not that similar, to check1
+    if try_to_check(lambda x, y: x == y, method_output_list, test_output_split, check_number=4):
+        return True
+
+    if try_to_check(order_invariant_check, method_output_split, test_output_split, check_number=5):
+        return True
+
+    # if they are all numbers, round so that similar numbers are treated as identical
+    if try_to_check(order_invariant_check, round_floats(method_output_split), round_floats(test_output_split),
+                    check_number=6):
+        return True
+
+    if debug:
+        nl = "\n"
+        if isinstance(inputs, list):
+            inputs = "\n".join(inputs)
+        if not isinstance(inputs, list):
+            print(
+                f"output = {method_output_split}, test outputs = {test_output_split}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output_split == [test_output_split]}")
+        else:
+            print(
+                f"output = {method_output_split}, test outputs = {test_output_split}, inputs = {inputs}, {type(inputs)}, {method_output_split == [test_output_split]}")
+
+    return False
 
 def custom_compare_(output, ground_truth):
     
