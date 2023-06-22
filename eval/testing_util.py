@@ -301,13 +301,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         results.append(formatted_output)
         return results
     elif which_type == CODE_TYPE.standard_input:
-        if isinstance(test_output, list):
-            test_output = "\n".join(test_output)
-        test_output_without_spacing = remove_spacing(test_output)
-        test_output_split = split_up_list(test_output_without_spacing)
-
-        method_output_list = list(filter(len, method_output)) if isinstance(method_output, list) else method_output
-        method_output_split = method_output_to_split_list(method_output_list)
+        test_output, test_output_without_spacing, test_output_split = format_test_output(test_output)
+        method_output, method_output_list, method_output_split = format_method_output(method_output)
 
         if debug:
             print(f"==> output = {method_output}, test outputs = {test_output}")
@@ -400,6 +395,18 @@ def get_method_output(which_type, method, inputs):
         signal.alarm(0)
         faulthandler.disable()
         return None
+
+def format_test_output(test_output):
+    if isinstance(test_output, list):
+        test_output = "\n".join(test_output)
+    test_output_without_spacing = remove_spacing(test_output)
+    test_output_split = split_up_list(test_output_without_spacing)
+    return test_output, test_output_without_spacing, test_output_split
+
+def format_method_output(method_output):
+    method_output_list = list(filter(len, method_output)) if isinstance(method_output, list) else method_output
+    method_output_split = method_output_to_split_list(method_output_list)
+    return method_output, method_output_list, method_output_split
 
 def try_to_check(checker, method_output, test_output, check_number=None):
     try:
