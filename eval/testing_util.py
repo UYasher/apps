@@ -357,11 +357,9 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         # try by converting the output into a split up list too
         method_output_to_split_list(method_output)
 
-        # Seems different from check1, but similar-ish structure
-        try:
-            tmp_result = (set(frozenset(s) for s in method_output) == set(frozenset(s) for s in test_output))
-        except Exception as e:
-            print(f"Failed check5 exception = {e}")
+        if try_to_check(order_invariant_check, method_output, test_output, check_number=5):
+            results.append(True)
+            return results
 
         # if they are all numbers, round so that similar numbers are treated as identical
         try:
@@ -465,6 +463,9 @@ def method_output_to_split_list(method_output):
         method_output = list(filter(len, method_output))
         method_output = set(method_output)
     return method_output
+
+def order_invariant_check(method_output, test_output):
+    return set(frozenset(s) for s in method_output) == set(frozenset(s) for s in test_output)
 
 def custom_compare_(output, ground_truth):
     
