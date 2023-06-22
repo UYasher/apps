@@ -316,15 +316,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(True)
             return results
 
-        # try one more time without \n
-        if isinstance(test_output, list):
-            for tmp_index, i in enumerate(test_output):
-                test_output[tmp_index] = i.split("\n")
-                test_output[tmp_index] = [x.strip() for x in test_output[tmp_index] if x]
-        else:
-            test_output = test_output.split("\n")
-            test_output = list(filter(len, test_output))
-            test_output = list(map(lambda x: x.strip(), test_output))
+        test_output = transform_2(test_output)
 
         # Very similar to check 1, but that has a greater conditional
         try:
@@ -485,6 +477,18 @@ def check_1(method_output, test_output):
     except Exception as e:
         print(f"Failed check1 exception = {e}")
     return False
+
+def transform_2(test_output):
+    # try one more time without \n
+    if isinstance(test_output, list):
+        for tmp_index, i in enumerate(test_output):
+            test_output[tmp_index] = i.split("\n")
+            test_output[tmp_index] = [x.strip() for x in test_output[tmp_index] if x]
+    else:
+        test_output = test_output.split("\n")
+        test_output = list(filter(len, test_output))
+        test_output = list(map(lambda x: x.strip(), test_output))
+    return test_output
 
 def custom_compare_(output, ground_truth):
     
