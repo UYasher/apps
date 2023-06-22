@@ -272,18 +272,21 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
 
     signal.alarm(timeout)
     faulthandler.enable()
-    if which_type == CODE_TYPE.call_based:  # Call-based
-        try:
-            method_output = method(*inputs)
-            # reset the alarm
-            signal.alarm(0)
-        except Exception as e:
-            signal.alarm(0)
-            faulthandler.disable()
-            print(f"Standard input runtime error or time limit exceeded error = {e}")
-            results.append(-1)
-            return results
 
+    method_output = get_method_output(which_type, method, inputs)
+    if method_output is None:
+        if which_type == CODE_TYPE.standard_input and debug:
+            nl = "\n"
+            if not isinstance(inputs, list):
+                print(
+                    f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output == [test_output]}")
+            else:
+                print(
+                    f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
+        results.append(-1)
+        return results
+
+    if which_type == CODE_TYPE.call_based:  # Call-based
         if debug:
             print(
                 f"outputs = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
@@ -298,38 +301,13 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         results.append(formatted_output)
         return results
     elif which_type == CODE_TYPE.standard_input:  # Standard input
-        passed = False
 
         if isinstance(inputs, list):
             inputs = "\n".join(inputs)
         if isinstance(test_output, list):
             test_output = "\n".join(test_output)
 
-        with Capturing() as method_output:
-            try:
-                call_method(method, inputs)
-                # reset the alarm
-                signal.alarm(0)
-                passed = True
-            except Exception as e:
-                # runtime error or took too long
-                signal.alarm(0)
-                print(f"Call-based runtime error or time limit exceeded error = {repr(e)}{e}")
-                results.append(-1)
-            signal.alarm(0)
-
-        if not passed:
-            if debug:
-                nl = "\n"
-                if not isinstance(inputs, list):
-                    print(
-                        f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output == [test_output]}")
-                else:
-                    print(
-                        f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
-            return results
-
-        if passed and debug:
+        if debug:
             print(f"==> output = {method_output}, test outputs = {test_output}")
 
         if custom_compare_(method_output, test_output):
@@ -493,6 +471,22 @@ def parse_output_format(method_output, test_output):
         pass
 
     return tmp_result
+
+def get_method_output(which_type, method, inputs):
+    try:
+        if which_type == CODE_TYPE.call_based:
+            method_output = method(*inputs)
+        else:
+            with Capturing() as method_output:
+                call_method(method, inputs)
+        signal.alarm(0)
+        return method_output
+    except Exception as e:
+        print(f"{'Standard input' if which_type == CODE_TYPE.call_based else 'Call-based'} runtime error or time limit exceeded error = {e}")
+        signal.alarm(0)
+        faulthandler.disable()
+        return None
+
 
 def custom_compare_(output, ground_truth):
     
