@@ -195,25 +195,6 @@ def run_code_on_test(in_outs, test, debug):
 
     return results
 
-
-def convert_test_to_code_prefix(test):
-    formatted_lines = [f"{line}\n" if is_import(line) else f"\t{line}\n" for line in test.split("\n")]
-
-    start_of_code = find_first_index(formatted_lines, lambda line: line.startswith("\t"))
-    return "\n".join(
-        formatted_lines[:start_of_code]
-        + ["stdin = sys.stdin\nstdout = sys.stdout\ndef code():\n"]
-        + ["\t" + line if is_import(line) else line for line in formatted_lines[start_of_code:]]
-    )
-
-def find_first_index(lst, predicate):
-    return next(i for i, x in enumerate(lst) if predicate(x))
-
-
-def is_import(line):
-    return line.startswith("from ") or line.startswith("import ")
-
-
 def get_method(test, which_type, method_name, debug):
     sol = DEFAULT_IMPORTS
     if debug:
@@ -245,6 +226,22 @@ def get_method(test, which_type, method_name, debug):
         return None
 
     return method
+
+def convert_test_to_code_prefix(test):
+    formatted_lines = [f"{line}\n" if is_import(line) else f"\t{line}\n" for line in test.split("\n")]
+
+    start_of_code = find_first_index(formatted_lines, lambda line: line.startswith("\t"))
+    return "\n".join(
+        formatted_lines[:start_of_code]
+        + ["stdin = sys.stdin\nstdout = sys.stdout\ndef code():\n"]
+        + ["\t" + line if is_import(line) else line for line in formatted_lines[start_of_code:]]
+    )
+
+def find_first_index(lst, predicate):
+    return next(i for i, x in enumerate(lst) if predicate(x))
+
+def is_import(line):
+    return line.startswith("from ") or line.startswith("import ")
 
 def json_dict_to_list(in_outs):
     for index, inputs in enumerate(in_outs["inputs"]):
@@ -323,13 +320,13 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         if isinstance(test_output, list):
             for tmp_index, i in enumerate(test_output):
                 test_output[tmp_index] = i.split("\n")
-                test_output[tmp_index] = [x.strip() for x in test_output[tmp_index] if
-                                          x]
+                test_output[tmp_index] = [x.strip() for x in test_output[tmp_index] if x]
         else:
             test_output = test_output.split("\n")
             test_output = list(filter(len, test_output))
             test_output = list(map(lambda x: x.strip(), test_output))
 
+        # Very similar to check 1, but that has a greater conditional
         try:
             tmp_result = (method_output == [test_output])
             if isinstance(test_output, list):
@@ -359,6 +356,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(tmp_result)
             return results
 
+        # Similar to check 1
         try:
             tmp_result = (method_output == [test_output])
             if isinstance(test_output, list):
@@ -366,7 +364,6 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         except Exception as e:
             print(f"Failed check3 exception = {e}")
             pass
-
         try:
             output_float = [float(e) for e in method_output]
             gt_float = [float(e) for e in test_output]
@@ -374,6 +371,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
                     (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float))
         except Exception as e:
             pass
+
+
         try:
             if isinstance(method_output[0], list):
                 output_float = [float(e) for e in method_output[0]]
@@ -394,6 +393,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         else:
             test_output = set(test_output.split())
 
+        # Similar, but not that similar, to check1
         try:
             tmp_result = (method_output == test_output)
         except Exception as e:
@@ -416,6 +416,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             method_output = list(filter(len, method_output))
             method_output = set(method_output)
 
+        # Seems different from check1, but similar-ish structure
         try:
             tmp_result = (set(frozenset(s) for s in method_output) == set(frozenset(s) for s in test_output))
         except Exception as e:
@@ -429,7 +430,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         except Exception as e:
             print(f"Failed check6 exception = {e}")
 
-        if tmp_result == True and debug:
+        if tmp_result and debug:
             print("PASSED")
 
         results.append(tmp_result)
