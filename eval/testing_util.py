@@ -363,7 +363,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
 
         # if they are all numbers, round so that similar numbers are treated as identical
         try:
-            tmp_result = tmp_result or (set(frozenset(round(float(t), 3) for t in s) for s in method_output) == \
+            tmp_result = (set(frozenset(round(float(t), 3) for t in s) for s in method_output) == \
                                         set(frozenset(round(float(t), 3) for t in s) for s in
                                             test_output))
         except Exception as e:
@@ -465,7 +465,10 @@ def method_output_to_split_list(method_output):
     return method_output
 
 def order_invariant_check(method_output, test_output):
-    return set(frozenset(s) for s in method_output) == set(frozenset(s) for s in test_output)
+    return order_invariant(method_output) == order_invariant(test_output)
+
+def order_invariant(xs):
+    return set(frozenset(x) for x in xs)
 
 def custom_compare_(output, ground_truth):
     
