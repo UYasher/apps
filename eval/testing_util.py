@@ -306,6 +306,11 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             inputs = "\n".join(inputs)
         if isinstance(test_output, list):
             test_output = "\n".join(test_output)
+        test_output_without_spacing = remove_spacing(test_output)
+        test_output_split = split_up_list(test_output_without_spacing)
+
+        method_output_list = list(filter(len, method_output)) if isinstance(method_output, list) else method_output
+        method_output_split = method_output_to_split_list(method_output_list)
 
         if debug:
             print(f"==> output = {method_output}, test outputs = {test_output}")
@@ -318,53 +323,42 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(True)
             return results
 
-        test_output = remove_spacing(test_output)
-
-        if try_to_check(basic_check, method_output, test_output, check_number=2):
+        if try_to_check(basic_check, method_output, test_output_without_spacing, check_number=2):
             results.append(True)
             return results
-
-        # try by converting the output into a split up list too
-        if isinstance(method_output, list):
-            method_output = list(filter(len, method_output))
 
         if debug:
             nl = "\n"
             if not isinstance(inputs, list):
                 print(
-                    f"output = {method_output}, test outputs = {test_output}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output == [test_output]}")
+                    f"output = {method_output_list}, test outputs = {test_output_without_spacing}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output_list == [test_output_without_spacing]}")
             else:
                 print(
-                    f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
+                    f"output = {method_output_list}, test outputs = {test_output_without_spacing}, inputs = {inputs}, {type(inputs)}, {method_output_list == [test_output_without_spacing]}")
 
-        if try_to_check(basic_check, method_output, test_output, check_number=3):
+        if try_to_check(basic_check, method_output_list, test_output_without_spacing, check_number=3):
             results.append(True)
             return results
 
-        if try_to_check(float_list_check, method_output, test_output):
+        if try_to_check(float_list_check, method_output_list, test_output_without_spacing):
             results.append(True)
             return results
 
-        if isinstance(method_output[0], list) and try_to_check(float_list_check, method_output[0], test_output[0]):
+        if isinstance(method_output[0], list) and try_to_check(float_list_check, method_output_list[0], test_output_without_spacing[0]):
             results.append(True)
             return results
-
-        test_output = split_up_list(test_output)
 
         # Similar, but not that similar, to check1
-        if try_to_check(lambda x, y: x == y, method_output, test_output, check_number=4):
+        if try_to_check(lambda x, y: x == y, method_output_list, test_output_split, check_number=4):
             results.append(True)
             return results
 
-        # try by converting the output into a split up list too
-        method_output_to_split_list(method_output)
-
-        if try_to_check(order_invariant_check, method_output, test_output, check_number=5):
+        if try_to_check(order_invariant_check, method_output_split, test_output_split, check_number=5):
             results.append(True)
             return results
 
         # if they are all numbers, round so that similar numbers are treated as identical
-        if try_to_check(order_invariant_check, round_floats(method_output), round_floats(test_output), check_number=6):
+        if try_to_check(order_invariant_check, round_floats(method_output_split), round_floats(test_output_split), check_number=6):
             results.append(True)
             return results
 
@@ -372,10 +366,10 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             nl = "\n"
             if not isinstance(inputs, list):
                 print(
-                    f"output = {method_output}, test outputs = {test_output}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output == [test_output]}")
+                    f"output = {method_output_split}, test outputs = {test_output_split}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output_split == [test_output_split]}")
             else:
                 print(
-                    f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
+                    f"output = {method_output_split}, test outputs = {test_output_split}, inputs = {inputs}, {type(inputs)}, {method_output_split == [test_output_split]}")
 
         return [False]
     return results
