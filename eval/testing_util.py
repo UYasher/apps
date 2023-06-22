@@ -286,13 +286,14 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         results.append(-1)
         return results
 
+    if isinstance(method_output, tuple):
+        method_output = list(method_output)
+
     if which_type == CODE_TYPE.call_based:  # Call-based
         if debug:
             print(
                 f"outputs = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
 
-        if isinstance(method_output, tuple):
-            method_output = list(method_output)
         formatted_output = parse_output_format(method_output, test_output)
 
         faulthandler.disable()
@@ -311,13 +312,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             print(f"==> output = {method_output}, test outputs = {test_output}")
 
         if custom_compare_(method_output, test_output):
-            tmp_result = True
-            results.append(tmp_result)
+            results.append(True)
             return results
-
-        # ground truth sequences are expressed as lists not tuples
-        if isinstance(method_output, tuple):
-            method_output = list(method_output)
 
         tmp_result = False
         try:
