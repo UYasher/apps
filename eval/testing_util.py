@@ -301,9 +301,6 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         results.append(formatted_output)
         return results
     elif which_type == CODE_TYPE.standard_input:
-
-        if isinstance(inputs, list):
-            inputs = "\n".join(inputs)
         if isinstance(test_output, list):
             test_output = "\n".join(test_output)
         test_output_without_spacing = remove_spacing(test_output)
@@ -329,6 +326,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
 
         if debug:
             nl = "\n"
+            if isinstance(inputs, list):
+                inputs = "\n".join(inputs)
             if not isinstance(inputs, list):
                 print(
                     f"output = {method_output_list}, test outputs = {test_output_without_spacing}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output_list == [test_output_without_spacing]}")
@@ -364,6 +363,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
 
         if debug:
             nl = "\n"
+            if isinstance(inputs, list):
+                inputs = "\n".join(inputs)
             if not isinstance(inputs, list):
                 print(
                     f"output = {method_output_split}, test outputs = {test_output_split}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output_split == [test_output_split]}")
