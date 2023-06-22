@@ -354,17 +354,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(True)
             return results
 
-            # try by converting the output into a split up list too
-        if isinstance(method_output, list):
-            for tmp_index, i in enumerate(method_output):
-                method_output[tmp_index] = i.split()
-            method_output = list(filter(len, method_output))
-            for tmp_index, i in enumerate(method_output):
-                method_output[tmp_index] = set(i)
-        else:
-            method_output = method_output.split()
-            method_output = list(filter(len, method_output))
-            method_output = set(method_output)
+        # try by converting the output into a split up list too
+        method_output_to_split_list(method_output)
 
         # Seems different from check1, but similar-ish structure
         try:
@@ -461,6 +452,19 @@ def split_up_list(test_output):
         test_output = set(test_output.split())
 
     return test_output
+
+def method_output_to_split_list(method_output):
+    if isinstance(method_output, list):
+        for tmp_index, i in enumerate(method_output):
+            method_output[tmp_index] = i.split()
+        method_output = list(filter(len, method_output))
+        for tmp_index, i in enumerate(method_output):
+            method_output[tmp_index] = set(i)
+    else:
+        method_output = method_output.split()
+        method_output = list(filter(len, method_output))
+        method_output = set(method_output)
+    return method_output
 
 def custom_compare_(output, ground_truth):
     
