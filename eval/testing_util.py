@@ -202,16 +202,7 @@ def run_code_on_test(in_outs, test, debug):
         signal.alarm(0)
 
     elif which_type == CODE_TYPE.standard_input:
-        # sol
-        tmp_test = test.split("\n")
-
-        new_test = []
-        for x in tmp_test:
-            if not is_import(x):
-                new_test.append("\t" + x + "\n")
-            else:
-                new_test.append(x + "\n")
-        tmp_test = new_test
+        tmp_test = [f"{line}\n" if is_import(line) else f"\t{line}\n" for line in test.split("\n")]
 
         new_test = ""
         started = False
