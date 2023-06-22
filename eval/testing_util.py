@@ -381,17 +381,15 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
     return results
 
 def parse_output_format(method_output, test_output):
-    tmp_result = method_output == test_output
-    if isinstance(test_output, list) and test_output:
-        tmp_result = tmp_result or (method_output == test_output[0])
-
+    if method_output == test_output:
+        return True
+    if isinstance(test_output, list) and test_output and method_output == test_output[0]:
+        return True
     try:
         if isinstance(method_output[0], tuple):
-            tmp_result = tmp_result or ([list(x) for x in method_output] == test_output[0])
+            return [list(x) for x in method_output] == test_output[0]
     except:
-        pass
-
-    return tmp_result
+        return False
 
 def get_method_output(which_type, method, inputs):
     try:
