@@ -318,17 +318,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
 
         test_output = remove_spacing(test_output)
 
-        # Very similar to check 1, but that has a greater conditional
-        try:
-            tmp_result = (method_output == [test_output])
-            if isinstance(test_output, list):
-                tmp_result = tmp_result or (method_output == test_output)
-        except Exception as e:
-            print(f"Failed check2 exception = {e}")
-            pass
-
-        if tmp_result:
-            results.append(tmp_result)
+        if try_to_check(basic_check, method_output, test_output, 2):
+            results.append(True)
             return results
 
         # try by converting the output into a split up list too
@@ -343,10 +334,6 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             else:
                 print(
                     f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
-
-        if tmp_result:
-            results.append(tmp_result)
-            return results
 
         # Similar to check 1
         try:
