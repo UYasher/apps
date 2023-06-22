@@ -187,7 +187,7 @@ def run_code_on_test(in_outs, test, debug):
 
     in_outs = json_dict_to_list(in_outs)
 
-    for index, inputs in enumerate(in_outs["inputs"]):
+    for index, (inputs, test_output) in enumerate(zip(in_outs["inputs"], in_outs["outputs"])):
         if debug:
             print(
                 f"time: {datetime.now().time()} testing index = {index}  inputs = {inputs}, {type(inputs)}. type = {which_type}")
@@ -195,20 +195,20 @@ def run_code_on_test(in_outs, test, debug):
             signal.alarm(timeout)
             faulthandler.enable()
             try:
-                output = method(*inputs)
+                method_output = method(*inputs)
 
                 # ground truth sequences are not tuples
-                if isinstance(output, tuple):
-                    output = list(output)
+                if isinstance(method_output, tuple):
+                    method_output = list(method_output)
 
-                tmp_result = output == in_outs["outputs"][index]
-                if isinstance(in_outs["outputs"][index], list) and in_outs["outputs"][index]:
-                    tmp_result = tmp_result or (output == in_outs["outputs"][index][0])
+                tmp_result = method_output == test_output
+                if isinstance(test_output, list) and test_output:
+                    tmp_result = tmp_result or (method_output == test_output[0])
 
                 # ground truth sequences are not tuples
                 try:
-                    if isinstance(output[0], tuple):
-                        tmp_result = tmp_result or ([list(x) for x in output] == in_outs["outputs"][index][0])
+                    if isinstance(method_output[0], tuple):
+                        tmp_result = tmp_result or ([list(x) for x in method_output] == test_output[0])
                 except:
                     pass
                 results.append(tmp_result)
@@ -225,7 +225,7 @@ def run_code_on_test(in_outs, test, debug):
             signal.alarm(0)
             if debug:
                 print(
-                    f"outputs = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
+                    f"outputs = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
         elif which_type == CODE_TYPE.standard_input:  # Standard input
             faulthandler.enable()
             signal.alarm(timeout)
@@ -233,10 +233,10 @@ def run_code_on_test(in_outs, test, debug):
 
             if isinstance(inputs, list):
                 inputs = "\n".join(inputs)
-            if isinstance(in_outs['outputs'][index], list):
-                in_outs['outputs'][index] = "\n".join(in_outs['outputs'][index])
+            if isinstance(test_output, list):
+                test_output = "\n".join(test_output)
 
-            with Capturing() as output:
+            with Capturing() as method_output:
                 try:
                     call_method(method, inputs)
                     # reset the alarm
@@ -254,31 +254,31 @@ def run_code_on_test(in_outs, test, debug):
                     nl = "\n"
                     if not isinstance(inputs, list):
                         print(
-                            f"not passed output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
+                            f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output == [test_output]}")
                     else:
                         print(
-                            f"not passed output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
+                            f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
                 continue
 
             if passed and debug:
-                print(f"==> output = {output}, test outputs = {in_outs['outputs'][index]}")
+                print(f"==> output = {method_output}, test outputs = {test_output}")
 
-            if custom_compare_(output, in_outs['outputs'][index]):
+            if custom_compare_(method_output, test_output):
                 tmp_result = True
                 results.append(tmp_result)
                 continue
 
             # ground truth sequences are expressed as lists not tuples
-            if isinstance(output, tuple):
-                output = list(output)
+            if isinstance(method_output, tuple):
+                method_output = list(method_output)
 
             tmp_result = False
             try:
-                tmp_result = (output == [in_outs["outputs"][index]])
-                if isinstance(in_outs["outputs"][index], list):
-                    tmp_result = tmp_result or (output == in_outs["outputs"][index])
-                    if isinstance(output[0], str):
-                        tmp_result = tmp_result or ([e.strip() for e in output] == in_outs["outputs"][index])
+                tmp_result = (method_output == [test_output])
+                if isinstance(test_output, list):
+                    tmp_result = tmp_result or (method_output == test_output)
+                    if isinstance(method_output[0], str):
+                        tmp_result = tmp_result or ([e.strip() for e in method_output] == test_output)
             except Exception as e:
                 print(f"Failed check1 exception = {e}")
                 pass
@@ -288,20 +288,20 @@ def run_code_on_test(in_outs, test, debug):
                 continue
 
             # try one more time without \n
-            if isinstance(in_outs["outputs"][index], list):
-                for tmp_index, i in enumerate(in_outs["outputs"][index]):
-                    in_outs["outputs"][index][tmp_index] = i.split("\n")
-                    in_outs["outputs"][index][tmp_index] = [x.strip() for x in in_outs["outputs"][index][tmp_index] if
+            if isinstance(test_output, list):
+                for tmp_index, i in enumerate(test_output):
+                    test_output[tmp_index] = i.split("\n")
+                    test_output[tmp_index] = [x.strip() for x in test_output[tmp_index] if
                                                             x]
             else:
-                in_outs["outputs"][index] = in_outs["outputs"][index].split("\n")
-                in_outs["outputs"][index] = list(filter(len, in_outs["outputs"][index]))
-                in_outs["outputs"][index] = list(map(lambda x: x.strip(), in_outs["outputs"][index]))
+                test_output = test_output.split("\n")
+                test_output = list(filter(len, test_output))
+                test_output = list(map(lambda x: x.strip(), test_output))
 
             try:
-                tmp_result = (output == [in_outs["outputs"][index]])
-                if isinstance(in_outs["outputs"][index], list):
-                    tmp_result = tmp_result or (output == in_outs["outputs"][index])
+                tmp_result = (method_output == [test_output])
+                if isinstance(test_output, list):
+                    tmp_result = tmp_result or (method_output == test_output)
             except Exception as e:
                 print(f"Failed check2 exception = {e}")
                 pass
@@ -311,41 +311,41 @@ def run_code_on_test(in_outs, test, debug):
                 continue
 
             # try by converting the output into a split up list too
-            if isinstance(output, list):
-                output = list(filter(len, output))
+            if isinstance(method_output, list):
+                method_output = list(filter(len, method_output))
 
             if debug:
                 nl = "\n"
                 if not isinstance(inputs, list):
                     print(
-                        f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
+                        f"output = {method_output}, test outputs = {test_output}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output == [test_output]}")
                 else:
                     print(
-                        f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
+                        f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
 
             if tmp_result == True:
                 results.append(tmp_result)
                 continue
 
             try:
-                tmp_result = (output == [in_outs["outputs"][index]])
-                if isinstance(in_outs["outputs"][index], list):
-                    tmp_result = tmp_result or (output == in_outs["outputs"][index])
+                tmp_result = (method_output == [test_output])
+                if isinstance(test_output, list):
+                    tmp_result = tmp_result or (method_output == test_output)
             except Exception as e:
                 print(f"Failed check3 exception = {e}")
                 pass
 
             try:
-                output_float = [float(e) for e in output]
-                gt_float = [float(e) for e in in_outs['outputs'][index]]
+                output_float = [float(e) for e in method_output]
+                gt_float = [float(e) for e in test_output]
                 tmp_result = tmp_result or (
                             (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float))
             except Exception as e:
                 pass
             try:
-                if isinstance(output[0], list):
-                    output_float = [float(e) for e in output[0]]
-                    gt_float = [float(e) for e in in_outs['outputs'][index][0]]
+                if isinstance(method_output[0], list):
+                    output_float = [float(e) for e in method_output[0]]
+                    gt_float = [float(e) for e in test_output[0]]
                     tmp_result = tmp_result or (
                                 (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float))
             except Exception as e:
@@ -356,14 +356,14 @@ def run_code_on_test(in_outs, test, debug):
                 continue
 
             # try by converting the stuff into split up list
-            if isinstance(in_outs["outputs"][index], list):
-                for tmp_index, i in enumerate(in_outs["outputs"][index]):
-                    in_outs["outputs"][index][tmp_index] = set(i.split())
+            if isinstance(test_output, list):
+                for tmp_index, i in enumerate(test_output):
+                    test_output[tmp_index] = set(i.split())
             else:
-                in_outs["outputs"][index] = set(in_outs["outputs"][index].split())
+                test_output = set(test_output.split())
 
             try:
-                tmp_result = (output == in_outs["outputs"][index])
+                tmp_result = (method_output == test_output)
             except Exception as e:
                 print(f"Failed check4 exception = {e}")
                 continue
@@ -373,27 +373,27 @@ def run_code_on_test(in_outs, test, debug):
                 continue
 
                 # try by converting the output into a split up list too
-            if isinstance(output, list):
-                for tmp_index, i in enumerate(output):
-                    output[tmp_index] = i.split()
-                output = list(filter(len, output))
-                for tmp_index, i in enumerate(output):
-                    output[tmp_index] = set(i)
+            if isinstance(method_output, list):
+                for tmp_index, i in enumerate(method_output):
+                    method_output[tmp_index] = i.split()
+                method_output = list(filter(len, method_output))
+                for tmp_index, i in enumerate(method_output):
+                    method_output[tmp_index] = set(i)
             else:
-                output = output.split()
-                output = list(filter(len, output))
-                output = set(output)
+                method_output = method_output.split()
+                method_output = list(filter(len, method_output))
+                method_output = set(method_output)
 
             try:
-                tmp_result = (set(frozenset(s) for s in output) == set(frozenset(s) for s in in_outs["outputs"][index]))
+                tmp_result = (set(frozenset(s) for s in method_output) == set(frozenset(s) for s in test_output))
             except Exception as e:
                 print(f"Failed check5 exception = {e}")
 
             # if they are all numbers, round so that similar numbers are treated as identical
             try:
-                tmp_result = tmp_result or (set(frozenset(round(float(t), 3) for t in s) for s in output) == \
+                tmp_result = tmp_result or (set(frozenset(round(float(t), 3) for t in s) for s in method_output) == \
                                             set(frozenset(round(float(t), 3) for t in s) for s in
-                                                in_outs["outputs"][index]))
+                                                test_output))
             except Exception as e:
                 print(f"Failed check6 exception = {e}")
 
@@ -406,10 +406,10 @@ def run_code_on_test(in_outs, test, debug):
                 nl = "\n"
                 if not isinstance(inputs, list):
                     print(
-                        f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
+                        f"output = {method_output}, test outputs = {test_output}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output == [test_output]}")
                 else:
                     print(
-                        f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
+                        f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
 
     return results
 
@@ -473,13 +473,13 @@ def json_dict_to_list(in_outs):
         except:
             pass
         try:
-            if isinstance(in_outs["outputs"][index], dict):
-                in_outs["outputs"][index] = [{int(k): v for k, v in in_outs["outputs"][index].items()}]
+            if isinstance(test_output, dict):
+                test_output = [{int(k): v for k, v in test_output.items()}]
         except:
             pass
         try:
-            if isinstance(in_outs["outputs"][index][0], dict):
-                in_outs["outputs"][index] = [{int(k): v for k, v in in_outs["outputs"][index][0].items()}]
+            if isinstance(test_output[0], dict):
+                test_output = [{int(k): v for k, v in test_output[0].items()}]
         except:
             pass
 
