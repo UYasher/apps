@@ -176,49 +176,31 @@ def run_code_on_test(in_outs, test, debug):
 
     method_name = in_outs.get("fn_name")
     which_type = CODE_TYPE.standard_input if method_name is None else CODE_TYPE.call_based
+    if method_name is None:
+        method_name = "code"
 
     results = []
     sol = DEFAULT_IMPORTS
     if debug:
         print(f"loading test code = {datetime.now().time()}")
 
-    if which_type == CODE_TYPE.call_based:
-        sol += test
-        if debug:
-            print(f"sol = {sol}")
-        signal.alarm(timeout)
-        try:
-            tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
-            if "class Solution" not in test:
-                tmp = tmp_sol
-            else:
-                tmp = tmp_sol.Solution()
-            signal.alarm(0)
-        except Exception as e:
-            signal.alarm(0)
-            print(f"type 0 compilation error = {e}")
-            results.append(-2)
-            return results
-        signal.alarm(0)
-
-    elif which_type == CODE_TYPE.standard_input:
-        sol += convert_test_to_code_prefix(test)
-        if debug:
-            print(f"sol = {sol}")
-        method_name = "code"
-        signal.alarm(timeout)
-        try:
-            tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
-            tmp = tmp_sol
-            signal.alarm(0)
-        except Exception as e:
-            signal.alarm(0)
-            print(f"type 1 compilation error = {e}")
-            results.append(-2)
-            return results
-        signal.alarm(0)
+    sol += test if which_type == CODE_TYPE.call_based else convert_test_to_code_prefix(test)
     if debug:
-        print(f"get method = {datetime.now().time()}")
+        print(f"sol = {sol}")
+    signal.alarm(timeout)
+    try:
+        tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
+        if "class Solution" not in test:
+            tmp = tmp_sol
+        else:
+            tmp = tmp_sol.Solution()
+        signal.alarm(0)
+    except Exception as e:
+        signal.alarm(0)
+        print(f"type {0 if which_type == CODE_TYPE.call_based else 1} compilation error = {e}")
+        results.append(-2)
+        return results
+    signal.alarm(0)
 
     try:
         method = getattr(tmp, method_name)  # get_attr second arg must be str
