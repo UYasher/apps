@@ -335,19 +335,15 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
                 print(
                     f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
 
-        # Similar to check 1
-        try:
-            tmp_result = (method_output == [test_output])
-            if isinstance(test_output, list):
-                tmp_result = tmp_result or (method_output == test_output)
-        except Exception as e:
-            print(f"Failed check3 exception = {e}")
-            pass
+        if try_to_check(basic_check, method_output, test_output, 3):
+            results.append(True)
+            return results
 
+        tmp_result = False
         try:
             output_float = [float(e) for e in method_output]
             gt_float = [float(e) for e in test_output]
-            tmp_result = tmp_result or (
+            tmp_result = (
                     (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float))
         except Exception as e:
             pass
