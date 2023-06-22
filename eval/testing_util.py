@@ -207,7 +207,7 @@ def run_code_on_test(in_outs, test, debug):
 
         new_test = []
         for x in tmp_test:
-            if (not x.startswith("from ")) and (not x.startswith("import ")):
+            if not is_import(x):
                 new_test.append("\t" + x + "\n")
             else:
                 new_test.append(x + "\n")
@@ -221,7 +221,7 @@ def run_code_on_test(in_outs, test, debug):
                 new_test += "def code():\n"
                 new_test += i
                 started = True
-            elif started and ((i.startswith("from ")) or (i.startswith("import "))):
+            elif started and is_import(i):
                 new_test += "\t" + i
             else:
                 new_test += i
@@ -496,6 +496,10 @@ def run_code_on_test(in_outs, test, debug):
                         f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
 
     return results
+
+
+def is_import(line):
+    return line.startswith("from ") or line.startswith("import ")
 
 
 def custom_compare_(output, ground_truth):
