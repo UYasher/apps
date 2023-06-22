@@ -473,17 +473,17 @@ def get_method_output(which_type, method, inputs):
         return None
 
 def check_1(method_output, test_output):
-    tmp_result = False
     try:
-        tmp_result = (method_output == [test_output])
+        if method_output == [test_output]:
+            return True
         if isinstance(test_output, list):
-            tmp_result = tmp_result or (method_output == test_output)
-            if isinstance(method_output[0], str):
-                tmp_result = tmp_result or ([e.strip() for e in method_output] == test_output)
+            if method_output == test_output:
+                return True
+            if isinstance(method_output[0], str) and [e.strip() for e in method_output] == test_output:
+                return True
     except Exception as e:
         print(f"Failed check1 exception = {e}")
-        pass
-    return tmp_result
+    return False
 
 def custom_compare_(output, ground_truth):
     
