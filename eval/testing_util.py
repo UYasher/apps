@@ -312,7 +312,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(True)
             return results
 
-        if check_1(method_output, test_output):
+        if try_to_check(check_1, method_output, test_output, 1):
             results.append(True)
             return results
 
@@ -356,6 +356,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         except Exception as e:
             print(f"Failed check3 exception = {e}")
             pass
+
         try:
             output_float = [float(e) for e in method_output]
             gt_float = [float(e) for e in test_output]
@@ -465,23 +466,30 @@ def get_method_output(which_type, method, inputs):
         faulthandler.disable()
         return None
 
-def check_1(method_output, test_output):
+def try_to_check(checker, method_output, test_output, check_number):
     try:
-        if method_output == [test_output]:
-            return True
-        if isinstance(test_output, list):
-            if method_output == test_output:
-                return True
-            if isinstance(method_output[0], str) and [e.strip() for e in method_output] == test_output:
-                return True
+        return checker(method_output, test_output)
     except Exception as e:
-        print(f"Failed check1 exception = {e}")
+        print(f"Failed check{check_number} exception = {e}")
+        return False
+
+
+def check_1(method_output, test_output):
+    if basic_check(method_output, test_output):
+        return True
+    if isinstance(test_output, list) and isinstance(method_output[0], str) and [e.strip() for e in method_output] == test_output:
+        return True
     return False
 
 def remove_spacing(test_output):
     output_list = test_output if isinstance(test_output, list) else [test_output]
     result = [[x.strip() for x in test_case_output.split("\n") if x.strip()] for test_case_output in output_list]
     return result if isinstance(test_output, list) else sum(result, [])
+
+def basic_check(method_output, test_output):
+    if method_output == [test_output]:
+        return True
+    return isinstance(test_output, list) and method_output == test_output
 
 def custom_compare_(output, ground_truth):
     
