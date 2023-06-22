@@ -191,7 +191,7 @@ def run_code_on_test(in_outs, test, debug):
         if debug:
             print(
                 f"time: {datetime.now().time()} testing index = {index}  inputs = {inputs}, {type(inputs)}. type = {which_type}")
-        results += run_single_test_case(method, which_type, inputs, test_output, debug)
+        results.append(run_single_test_case(method, which_type, inputs, test_output, debug))
         if debug and results[-1]:
             print("PASSED")
 
@@ -267,8 +267,6 @@ def json_dict_to_list(in_outs):
     return in_outs
 
 def run_single_test_case(method, which_type, inputs, test_output, debug):
-    results = []
-
     signal.alarm(timeout)
     faulthandler.enable()
 
@@ -282,8 +280,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             else:
                 print(
                     f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
-        results.append(-1)
-        return results
+        return -1
 
     if isinstance(method_output, tuple):
         method_output = list(method_output)
@@ -298,8 +295,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         faulthandler.disable()
         signal.alarm(0)
 
-        results.append(formatted_output)
-        return results
+        return formatted_output
     elif which_type == CODE_TYPE.standard_input:
         test_output, test_output_without_spacing, test_output_split = format_test_output(test_output)
         method_output, method_output_list, method_output_split = format_method_output(method_output)
@@ -308,16 +304,13 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             print(f"==> output = {method_output}, test outputs = {test_output}")
 
         if custom_compare_(method_output, test_output):
-            results.append(True)
-            return results
+            return True
 
         if try_to_check(check_1, method_output, test_output, check_number=1):
-            results.append(True)
-            return results
+            return True
 
         if try_to_check(basic_check, method_output, test_output_without_spacing, check_number=2):
-            results.append(True)
-            return results
+            return True
 
         if debug:
             nl = "\n"
@@ -331,30 +324,24 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
                     f"output = {method_output_list}, test outputs = {test_output_without_spacing}, inputs = {inputs}, {type(inputs)}, {method_output_list == [test_output_without_spacing]}")
 
         if try_to_check(basic_check, method_output_list, test_output_without_spacing, check_number=3):
-            results.append(True)
-            return results
+            return True
 
         if try_to_check(float_list_check, method_output_list, test_output_without_spacing):
-            results.append(True)
-            return results
+            return True
 
         if isinstance(method_output[0], list) and try_to_check(float_list_check, method_output_list[0], test_output_without_spacing[0]):
-            results.append(True)
-            return results
+            return True
 
         # Similar, but not that similar, to check1
         if try_to_check(lambda x, y: x == y, method_output_list, test_output_split, check_number=4):
-            results.append(True)
-            return results
+            return True
 
         if try_to_check(order_invariant_check, method_output_split, test_output_split, check_number=5):
-            results.append(True)
-            return results
+            return True
 
         # if they are all numbers, round so that similar numbers are treated as identical
         if try_to_check(order_invariant_check, round_floats(method_output_split), round_floats(test_output_split), check_number=6):
-            results.append(True)
-            return results
+            return True
 
         if debug:
             nl = "\n"
@@ -367,8 +354,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
                 print(
                     f"output = {method_output_split}, test outputs = {test_output_split}, inputs = {inputs}, {type(inputs)}, {method_output_split == [test_output_split]}")
 
-        return [False]
-    return results
+        return False
 
 def parse_output_format(method_output, test_output):
     if method_output == test_output:
