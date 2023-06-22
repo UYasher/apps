@@ -316,7 +316,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(True)
             return results
 
-        test_output = transform_2(test_output)
+        test_output = remove_spacing(test_output)
 
         # Very similar to check 1, but that has a greater conditional
         try:
@@ -478,17 +478,10 @@ def check_1(method_output, test_output):
         print(f"Failed check1 exception = {e}")
     return False
 
-def transform_2(test_output):
-    # try one more time without \n
-    if isinstance(test_output, list):
-        for tmp_index, i in enumerate(test_output):
-            test_output[tmp_index] = i.split("\n")
-            test_output[tmp_index] = [x.strip() for x in test_output[tmp_index] if x]
-    else:
-        test_output = test_output.split("\n")
-        test_output = list(filter(len, test_output))
-        test_output = list(map(lambda x: x.strip(), test_output))
-    return test_output
+def remove_spacing(test_output):
+    output_list = test_output if isinstance(test_output, list) else [test_output]
+    result = [[x.strip() for x in test_case_output.split("\n") if x.strip()] for test_case_output in output_list]
+    return result if isinstance(test_output, list) else sum(result, [])
 
 def custom_compare_(output, ground_truth):
     
