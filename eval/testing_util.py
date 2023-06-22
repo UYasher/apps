@@ -297,13 +297,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
 
         return formatted_output
     elif which_type == CODE_TYPE.standard_input:
-        test_output, test_output_without_spacing, test_output_split = format_test_output(test_output)
-        method_output, method_output_list, method_output_split = format_method_output(method_output)
-
-        if debug:
-            print(f"==> output = {method_output}, test outputs = {test_output}")
-
-        return parse_all_output_types(method_output, method_output_list, method_output_split, test_output, test_output_without_spacing, test_output_split, inputs, debug)
+        return parse_output_format_code_type(method_output, test_output, inputs, debug)
 
 def parse_output_format(method_output, test_output):
     if method_output == test_output:
@@ -315,6 +309,13 @@ def parse_output_format(method_output, test_output):
             return [list(x) for x in method_output] == test_output[0]
     except:
         return False
+
+def parse_output_format_code_type(method_output, test_output, inputs, debug):
+    test_output, test_output_without_spacing, test_output_split = format_test_output(test_output)
+    method_output, method_output_list, method_output_split = format_method_output(method_output)
+    if debug:
+        print(f"==> output = {method_output}, test outputs = {test_output}")
+    return parse_all_output_types(method_output, method_output_list, method_output_split, test_output, test_output_without_spacing, test_output_split, inputs, debug)
 
 def get_method_output(which_type, method, inputs):
     try:
