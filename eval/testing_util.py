@@ -315,19 +315,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(True)
             return results
 
-        tmp_result = False
-        try:
-            tmp_result = (method_output == [test_output])
-            if isinstance(test_output, list):
-                tmp_result = tmp_result or (method_output == test_output)
-                if isinstance(method_output[0], str):
-                    tmp_result = tmp_result or ([e.strip() for e in method_output] == test_output)
-        except Exception as e:
-            print(f"Failed check1 exception = {e}")
-            pass
-
-        if tmp_result:
-            results.append(tmp_result)
+        if check_1(method_output, test_output):
+            results.append(True)
             return results
 
         # try one more time without \n
@@ -483,6 +472,18 @@ def get_method_output(which_type, method, inputs):
         faulthandler.disable()
         return None
 
+def check_1(method_output, test_output):
+    tmp_result = False
+    try:
+        tmp_result = (method_output == [test_output])
+        if isinstance(test_output, list):
+            tmp_result = tmp_result or (method_output == test_output)
+            if isinstance(method_output[0], str):
+                tmp_result = tmp_result or ([e.strip() for e in method_output] == test_output)
+    except Exception as e:
+        print(f"Failed check1 exception = {e}")
+        pass
+    return tmp_result
 
 def custom_compare_(output, ground_truth):
     
