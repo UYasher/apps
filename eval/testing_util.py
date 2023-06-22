@@ -350,14 +350,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         test_output = split_up_list(test_output)
 
         # Similar, but not that similar, to check1
-        try:
-            tmp_result = (method_output == test_output)
-        except Exception as e:
-            print(f"Failed check4 exception = {e}")
-            return results
-
-        if tmp_result:
-            results.append(tmp_result)
+        if try_to_check(lambda x, y: x == y, method_output, test_output, check_number=4):
+            results.append(True)
             return results
 
             # try by converting the output into a split up list too
