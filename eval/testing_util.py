@@ -347,13 +347,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(True)
             return results
 
-
-        # try by converting the stuff into split up list
-        if isinstance(test_output, list):
-            for tmp_index, i in enumerate(test_output):
-                test_output[tmp_index] = set(i.split())
-        else:
-            test_output = set(test_output.split())
+        test_output = split_up_list(test_output)
 
         # Similar, but not that similar, to check1
         try:
@@ -465,6 +459,14 @@ def float_list_check(output, gt):
     output_float = [float(e) for e in output]
     gt_float = [float(e) for e in gt]
     return (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float)
+
+def split_up_list(test_output):
+    if isinstance(test_output, list):
+        test_output = [set(i.split()) for i in test_output]
+    else:
+        test_output = set(test_output.split())
+
+    return test_output
 
 def custom_compare_(output, ground_truth):
     
