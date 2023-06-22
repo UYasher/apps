@@ -180,34 +180,8 @@ def run_code_on_test(in_outs, test, debug):
         method_name = "code"
 
     results = []
-    sol = DEFAULT_IMPORTS
-    if debug:
-        print(f"loading test code = {datetime.now().time()}")
-
-    sol += test if which_type == CODE_TYPE.call_based else convert_test_to_code_prefix(test)
-    if debug:
-        print(f"sol = {sol}")
-    signal.alarm(timeout)
-    try:
-        tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
-        if "class Solution" not in test:
-            tmp = tmp_sol
-        else:
-            tmp = tmp_sol.Solution()
-        signal.alarm(0)
-    except Exception as e:
-        signal.alarm(0)
-        print(f"type {0 if which_type == CODE_TYPE.call_based else 1} compilation error = {e}")
-        results.append(-2)
-        return results
-    signal.alarm(0)
-
-    try:
-        method = getattr(tmp, method_name)  # get_attr second arg must be str
-    except:
-        signal.alarm(0)
-        e = sys.exc_info()
-        print(f"unable to get function error = {e}")
+    method = get_method(test, which_type, method_name, debug)
+    if method is None:
         results.append(-2)
         return results
 
@@ -471,6 +445,39 @@ def find_first_index(lst, predicate):
 
 def is_import(line):
     return line.startswith("from ") or line.startswith("import ")
+
+
+def get_method(test, which_type, method_name, debug):
+    sol = DEFAULT_IMPORTS
+    if debug:
+        print(f"loading test code = {datetime.now().time()}")
+
+    sol += test if which_type == CODE_TYPE.call_based else convert_test_to_code_prefix(test)
+    if debug:
+        print(f"sol = {sol}")
+    signal.alarm(timeout)
+    try:
+        tmp_sol = RuntimeModule.from_string("tmp_sol", "", sol)
+        if "class Solution" not in test:
+            tmp = tmp_sol
+        else:
+            tmp = tmp_sol.Solution()
+        signal.alarm(0)
+    except Exception as e:
+        signal.alarm(0)
+        print(f"type {0 if which_type == CODE_TYPE.call_based else 1} compilation error = {e}")
+        return None
+    signal.alarm(0)
+
+    try:
+        method = getattr(tmp, method_name)  # get_attr second arg must be str
+    except:
+        signal.alarm(0)
+        e = sys.exc_info()
+        print(f"unable to get function error = {e}")
+        return None
+
+    return method
 
 
 def custom_compare_(output, ground_truth):
