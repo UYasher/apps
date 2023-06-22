@@ -202,23 +202,7 @@ def run_code_on_test(in_outs, test, debug):
         signal.alarm(0)
 
     elif which_type == CODE_TYPE.standard_input:
-        tmp_test = [f"{line}\n" if is_import(line) else f"\t{line}\n" for line in test.split("\n")]
-
-        new_test = ""
-        started = False
-        for i in tmp_test:
-            if i.startswith("\t") and not started:
-                new_test += "stdin = sys.stdin\nstdout = sys.stdout\n"
-                new_test += "def code():\n"
-                new_test += i
-                started = True
-            elif started and is_import(i):
-                new_test += "\t" + i
-            else:
-                new_test += i
-        tmp_test = new_test
-
-        sol += tmp_test
+        sol += convert_test_to_code_prefix(test)
         if debug:
             print(f"sol = {sol}")
         method_name = "code"
@@ -487,6 +471,20 @@ def run_code_on_test(in_outs, test, debug):
                         f"output = {output}, test outputs = {in_outs['outputs'][index]}, inputs = {inputs}, {type(inputs)}, {output == [in_outs['outputs'][index]]}")
 
     return results
+
+
+def convert_test_to_code_prefix(test):
+    formatted_lines = [f"{line}\n" if is_import(line) else f"\t{line}\n" for line in test.split("\n")]
+
+    start_of_code = find_first_index(formatted_lines, lambda line: line.startswith("\t"))
+    return "\n".join(
+        formatted_lines[:start_of_code]
+        + ["stdin = sys.stdin\nstdout = sys.stdout\ndef code():\n"]
+        + ["\t" + line if is_import(line) else line for line in formatted_lines[start_of_code:]]
+    )
+
+def find_first_index(lst, predicate):
+    return next(i for i, x in enumerate(lst) if predicate(x))
 
 
 def is_import(line):
