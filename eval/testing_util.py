@@ -275,23 +275,6 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
     if which_type == CODE_TYPE.call_based:  # Call-based
         try:
             method_output = method(*inputs)
-
-            # ground truth sequences are not tuples
-            if isinstance(method_output, tuple):
-                method_output = list(method_output)
-
-            tmp_result = method_output == test_output
-            if isinstance(test_output, list) and test_output:
-                tmp_result = tmp_result or (method_output == test_output[0])
-
-            # ground truth sequences are not tuples
-            try:
-                if isinstance(method_output[0], tuple):
-                    tmp_result = tmp_result or ([list(x) for x in method_output] == test_output[0])
-            except:
-                pass
-            results.append(tmp_result)
-
             # reset the alarm
             signal.alarm(0)
         except Exception as e:
@@ -300,6 +283,21 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             print(f"Standard input runtime error or time limit exceeded error = {e}")
             results.append(-1)
             return results
+
+        if isinstance(method_output, tuple):
+            method_output = list(method_output)
+
+        tmp_result = method_output == test_output
+        if isinstance(test_output, list) and test_output:
+            tmp_result = tmp_result or (method_output == test_output[0])
+
+        try:
+            if isinstance(method_output[0], tuple):
+                tmp_result = tmp_result or ([list(x) for x in method_output] == test_output[0])
+        except:
+            pass
+        results.append(tmp_result)
+
         faulthandler.disable()
         signal.alarm(0)
         if debug:
