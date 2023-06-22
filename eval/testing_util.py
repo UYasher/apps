@@ -312,13 +312,13 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(True)
             return results
 
-        if try_to_check(check_1, method_output, test_output, 1):
+        if try_to_check(check_1, method_output, test_output, check_number=1):
             results.append(True)
             return results
 
         test_output = remove_spacing(test_output)
 
-        if try_to_check(basic_check, method_output, test_output, 2):
+        if try_to_check(basic_check, method_output, test_output, check_number=2):
             results.append(True)
             return results
 
@@ -335,32 +335,18 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
                 print(
                     f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
 
-        if try_to_check(basic_check, method_output, test_output, 3):
+        if try_to_check(basic_check, method_output, test_output, check_number=3):
             results.append(True)
             return results
 
-        tmp_result = False
-        try:
-            output_float = [float(e) for e in method_output]
-            gt_float = [float(e) for e in test_output]
-            tmp_result = (
-                    (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float))
-        except Exception as e:
-            pass
-
-
-        try:
-            if isinstance(method_output[0], list):
-                output_float = [float(e) for e in method_output[0]]
-                gt_float = [float(e) for e in test_output[0]]
-                tmp_result = tmp_result or (
-                        (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float))
-        except Exception as e:
-            pass
-
-        if tmp_result:
-            results.append(tmp_result)
+        if try_to_check(float_list_check, method_output, test_output):
+            results.append(True)
             return results
+
+        if isinstance(method_output[0], list) and try_to_check(float_list_check, method_output[0], test_output[0]):
+            results.append(True)
+            return results
+
 
         # try by converting the stuff into split up list
         if isinstance(test_output, list):
@@ -449,11 +435,12 @@ def get_method_output(which_type, method, inputs):
         faulthandler.disable()
         return None
 
-def try_to_check(checker, method_output, test_output, check_number):
+def try_to_check(checker, method_output, test_output, check_number=None):
     try:
         return checker(method_output, test_output)
     except Exception as e:
-        print(f"Failed check{check_number} exception = {e}")
+        if check_number is not None:
+            print(f"Failed check{check_number} exception = {e}")
         return False
 
 
@@ -473,6 +460,11 @@ def basic_check(method_output, test_output):
     if method_output == [test_output]:
         return True
     return isinstance(test_output, list) and method_output == test_output
+
+def float_list_check(output, gt):
+    output_float = [float(e) for e in output]
+    gt_float = [float(e) for e in gt]
+    return (len(output_float) == len(gt_float)) and np.allclose(output_float, gt_float)
 
 def custom_compare_(output, ground_truth):
     
