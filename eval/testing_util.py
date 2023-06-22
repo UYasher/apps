@@ -269,9 +269,10 @@ def json_dict_to_list(in_outs):
 
 def run_single_test_case(method, which_type, inputs, test_output, debug):
     results = []
+
+    signal.alarm(timeout)
+    faulthandler.enable()
     if which_type == CODE_TYPE.call_based:  # Call-based
-        signal.alarm(timeout)
-        faulthandler.enable()
         try:
             method_output = method(*inputs)
 
@@ -305,8 +306,6 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             print(
                 f"outputs = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
     elif which_type == CODE_TYPE.standard_input:  # Standard input
-        faulthandler.enable()
-        signal.alarm(timeout)
         passed = False
 
         if isinstance(inputs, list):
