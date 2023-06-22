@@ -185,24 +185,9 @@ def run_code_on_test(in_outs, test, debug):
         results.append(-2)
         return results
 
-    for index, inputs in enumerate(in_outs["inputs"]):
-        # JSON forces dictionaries to have string keys; this undoes this (assuming a singleton list)
-        try:
-            if isinstance(inputs[0], dict):
-                inputs = [{int(k): v for k, v in inputs[0].items()}]
-        except:
-            pass
-        try:
-            if isinstance(in_outs["outputs"][index], dict):
-                in_outs["outputs"][index] = [{int(k): v for k, v in in_outs["outputs"][index].items()}]
-        except:
-            pass
-        try:
-            if isinstance(in_outs["outputs"][index][0], dict):
-                in_outs["outputs"][index] = [{int(k): v for k, v in in_outs["outputs"][index][0].items()}]
-        except:
-            pass
+    in_outs = json_dict_to_list(in_outs)
 
+    for index, inputs in enumerate(in_outs["inputs"]):
         if debug:
             print(
                 f"time: {datetime.now().time()} testing index = {index}  inputs = {inputs}, {type(inputs)}. type = {which_type}")
@@ -479,6 +464,26 @@ def get_method(test, which_type, method_name, debug):
 
     return method
 
+def json_dict_to_list(in_outs):
+    for index, inputs in enumerate(in_outs["inputs"]):
+        # JSON forces dictionaries to have string keys; this undoes this (assuming a singleton list)
+        try:
+            if isinstance(inputs[0], dict):
+                in_outs["inputs"][index] = [{int(k): v for k, v in in_outs["inputs"][index][0].items()}]
+        except:
+            pass
+        try:
+            if isinstance(in_outs["outputs"][index], dict):
+                in_outs["outputs"][index] = [{int(k): v for k, v in in_outs["outputs"][index].items()}]
+        except:
+            pass
+        try:
+            if isinstance(in_outs["outputs"][index][0], dict):
+                in_outs["outputs"][index] = [{int(k): v for k, v in in_outs["outputs"][index][0].items()}]
+        except:
+            pass
+
+    return in_outs
 
 def custom_compare_(output, ground_truth):
     
