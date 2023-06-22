@@ -289,7 +289,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
     if isinstance(method_output, tuple):
         method_output = list(method_output)
 
-    if which_type == CODE_TYPE.call_based:  # Call-based
+    if which_type == CODE_TYPE.call_based:
         if debug:
             print(
                 f"outputs = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
@@ -301,7 +301,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
 
         results.append(formatted_output)
         return results
-    elif which_type == CODE_TYPE.standard_input:  # Standard input
+    elif which_type == CODE_TYPE.standard_input:
 
         if isinstance(inputs, list):
             inputs = "\n".join(inputs)
@@ -326,7 +326,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             print(f"Failed check1 exception = {e}")
             pass
 
-        if tmp_result == True:
+        if tmp_result:
             results.append(tmp_result)
             return results
 
@@ -349,7 +349,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             print(f"Failed check2 exception = {e}")
             pass
 
-        if tmp_result == True:
+        if tmp_result:
             results.append(tmp_result)
             return results
 
@@ -366,7 +366,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
                 print(
                     f"output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
 
-        if tmp_result == True:
+        if tmp_result:
             results.append(tmp_result)
             return results
 
@@ -394,7 +394,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
         except Exception as e:
             pass
 
-        if tmp_result == True:
+        if tmp_result:
             results.append(tmp_result)
             return results
 
@@ -411,7 +411,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             print(f"Failed check4 exception = {e}")
             return results
 
-        if tmp_result == True:
+        if tmp_result:
             results.append(tmp_result)
             return results
 
