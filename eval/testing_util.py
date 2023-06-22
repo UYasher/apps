@@ -284,16 +284,19 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
             results.append(-1)
             return results
 
-        if isinstance(method_output, tuple):
-            method_output = list(method_output)
-        formatted_output = parse_output_format(method_output, test_output)
-        results.append(formatted_output)
-
-        faulthandler.disable()
-        signal.alarm(0)
         if debug:
             print(
                 f"outputs = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
+
+        if isinstance(method_output, tuple):
+            method_output = list(method_output)
+        formatted_output = parse_output_format(method_output, test_output)
+
+        faulthandler.disable()
+        signal.alarm(0)
+
+        results.append(formatted_output)
+        return results
     elif which_type == CODE_TYPE.standard_input:  # Standard input
         passed = False
 
