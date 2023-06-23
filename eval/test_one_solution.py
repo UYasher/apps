@@ -143,6 +143,8 @@ def eval_and_save_problems(args):
                 print(f"\nTesting solution {o_idx}")
             curr_res = [-2]
             try:
+                print("prob_path: ", prob_path)
+                print("generation: ", o)
                 curr_res = check_correctness(prob_path=prob_path, generation=o, timeout=TIMEOUT, debug=args.debug)
                 fixed = []
                 for e in curr_res:
