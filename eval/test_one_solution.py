@@ -58,8 +58,6 @@ def check_correctness(prob_path, generation, timeout, debug):
     """Check correctness of code generation with a global timeout.
     The global timeout is to catch some extreme/rare cases not handled by the timeouts
     inside `run_test`"""
-    with open("the_result.json", "w") as f:
-        json.dump([], f)
     def _temp_run(prob_path, generation, debug, result):
         result.append(test_util.run_test(prob_path=prob_path, test=generation, debug=debug))
 
@@ -83,6 +81,9 @@ def check_correctness(prob_path, generation, timeout, debug):
 def eval_and_save_problems(args):
     with open(args.test_loc, "r") as f:
         problems = sorted(json.load(f))
+
+    with open("the_result.json", "w") as f:
+        f.write("[")
 
     print(len(problems))
     gpt_codes = {}
@@ -172,6 +173,11 @@ def eval_and_save_problems(args):
                 import pdb; pdb.set_trace()
                 print("didn't save problem due to {e}")
 
+    with open('the_result.json', 'rb+') as f:
+        f.seek(-1, 2)
+        f.truncate()
+    with open("the_result.json", "a") as f:
+        f.write("\n]")
     return results
 
 

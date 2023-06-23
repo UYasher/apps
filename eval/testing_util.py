@@ -273,7 +273,8 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
     method_output = get_method_output(which_type, method, inputs)
     with open("the_result.json", "a") as f:
         f.write("\n")
-        json.dump(x, f)
+        json.dump(method_output, f)
+        f.write(",")
     return method_output
 
 def parse_output_format(method_output, test_output):
