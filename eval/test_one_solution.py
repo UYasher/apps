@@ -59,6 +59,10 @@ def check_correctness(prob_path, generation, timeout, debug):
     The global timeout is to catch some extreme/rare cases not handled by the timeouts
     inside `run_test`"""
     def _temp_run(prob_path, generation, debug, result):
+        print("prob_path: ", type(prob_path))
+        print("generation: ", type(generation))
+        print("debug: ", type(debug))
+        print("result: ", type(result))
         result.append(test_util.run_test(prob_path=prob_path, test=generation, debug=debug))
 
     manager = multiprocessing.Manager()
@@ -130,9 +134,6 @@ def eval_and_save_problems(args):
             continue
         prob_path = os.path.join(args.root, problem)
 
-        with open(os.path.join(prob_path, "solutions.json"), "r") as f:
-            sols = json.load(f)
-        
         if not os.path.exists(args.save):
             os.makedirs(args.save)
 
@@ -198,7 +199,7 @@ def main(args):
     else:
         results = eval_and_save_problems(args)
 
-    print_results(results, args)
+    # print_results(results, args)
 
 
 if __name__ == "__main__":
