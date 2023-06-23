@@ -59,10 +59,10 @@ def check_correctness(prob_path, generation, timeout, debug):
     The global timeout is to catch some extreme/rare cases not handled by the timeouts
     inside `run_test`"""
     def _temp_run(prob_path, generation, debug, result):
-        print("prob_path: ", type(prob_path))
-        print("generation: ", type(generation))
-        print("debug: ", type(debug))
-        print("result: ", type(result))
+        # print("prob_path: ", type(prob_path))
+        # print("generation: ", type(generation))
+        # print("debug: ", type(debug))
+        # print("result: ", type(result))
         result.append(test_util.run_test(prob_path=prob_path, test=generation, debug=debug))
 
     manager = multiprocessing.Manager()
@@ -86,7 +86,7 @@ def eval_and_save_problems(args):
     with open(args.test_loc, "r") as f:
         problems = sorted(json.load(f))
 
-    with open("the_result.json", "w") as f:
+    with open("generate-temp/the_results.json", "w") as f:
         f.write("[")
 
     print(len(problems))
@@ -143,8 +143,8 @@ def eval_and_save_problems(args):
                 print(f"\nTesting solution {o_idx}")
             curr_res = [-2]
             try:
-                print("prob_path: ", prob_path)
-                print("generation: ", o)
+                # print("prob_path: ", prob_path)
+                # print("generation: ", o)
                 curr_res = check_correctness(prob_path=prob_path, generation=o, timeout=TIMEOUT, debug=args.debug)
                 fixed = []
                 for e in curr_res:
@@ -176,10 +176,10 @@ def eval_and_save_problems(args):
                 import pdb; pdb.set_trace()
                 print("didn't save problem due to {e}")
 
-    with open('the_result.json', 'rb+') as f:
+    with open('generate-temp/the_results.json', 'rb+') as f:
         f.seek(-1, 2)
         f.truncate()
-    with open("the_result.json", "a") as f:
+    with open("generate-temp/the_results.json", "a") as f:
         f.write("\n]")
     return results
 
