@@ -271,33 +271,7 @@ def run_single_test_case(method, which_type, inputs, test_output, debug):
     faulthandler.enable()
 
     method_output = get_method_output(which_type, method, inputs)
-    if method_output is None:
-        if which_type == CODE_TYPE.standard_input and debug:
-            nl = "\n"
-            if not isinstance(inputs, list):
-                print(
-                    f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs.replace(nl, ' new-line ')}, {type(inputs)}, {method_output == [test_output]}")
-            else:
-                print(
-                    f"not passed output = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
-        return -1
-
-    if isinstance(method_output, tuple):
-        method_output = list(method_output)
-
-    if which_type == CODE_TYPE.call_based:
-        if debug:
-            print(
-                f"outputs = {method_output}, test outputs = {test_output}, inputs = {inputs}, {type(inputs)}, {method_output == [test_output]}")
-
-        formatted_output = parse_output_format(method_output, test_output)
-
-        faulthandler.disable()
-        signal.alarm(0)
-
-        return formatted_output
-    elif which_type == CODE_TYPE.standard_input:
-        return parse_output_format_code_type(method_output, test_output, inputs, debug)
+    return method_output
 
 def parse_output_format(method_output, test_output):
     if method_output == test_output:
