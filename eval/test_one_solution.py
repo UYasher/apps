@@ -58,6 +58,8 @@ def check_correctness(prob_path, generation, timeout, debug):
     """Check correctness of code generation with a global timeout.
     The global timeout is to catch some extreme/rare cases not handled by the timeouts
     inside `run_test`"""
+    with open("the_result.json", "w") as f:
+        json.dump([], f)
     def _temp_run(prob_path, generation, debug, result):
         result.append(test_util.run_test(prob_path=prob_path, test=generation, debug=debug))
 
